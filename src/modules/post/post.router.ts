@@ -12,5 +12,5 @@ router.post('/',auth(UserRole.ADMIN,UserRole.USER),postController.createPost)
 
 
 router.get('/',postController.getAllPosts)
-
+ router.get('/:postId',postController.getPostById)
 export const postRouter:Router=router

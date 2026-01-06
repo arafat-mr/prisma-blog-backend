@@ -1,6 +1,8 @@
 import { Request, Response } from "express"
 import { PostService } from "./post.service"
 import { PostStatus } from "../../../generated/prisma/enums";
+import { paginationSorting } from "../../utils/pagination_sorting";
+import { prisma } from "../../lib/prisma";
 
 
 
@@ -49,7 +51,19 @@ const getAllPosts= async(req:Request,res:Response)=>{
 
     const searchByStatus= req.query.status as PostStatus | undefined
     const searchByAuthorId= req.query.authorId as string | undefined
-        const result= await PostService.getAllPostService({search:searchString,tags:tagsSearch,isFeatured:featured,status:searchByStatus,authorId: searchByAuthorId})
+    // const page =Number(req.query.page ?? 1)
+    // const limit= Number(req.query.limit ?? 5)
+    // const sortBy=req.query.sortBy as string
+    // const sortOrder= req.query.sortOrder as string
+
+    // const skip= (page-1)* limit
+
+    const  options= paginationSorting(req.query) 
+    const {page,limit,skip,sortBy,sortOrder}=options
+
+      console.log('PS Options : ',options);
+      
+        const result= await PostService.getAllPostService({search:searchString,tags:tagsSearch,isFeatured:featured,status:searchByStatus,authorId: searchByAuthorId,page,limit,skip,sortBy,sortOrder})
         // const result= await PostService.getAllPostService({search})
         res.status(200).json({
             result
@@ -63,8 +77,29 @@ const getAllPosts= async(req:Request,res:Response)=>{
 }
 
 
+const getPostById= async(req:Request,res:Response)=>{
 
+    
+    try {
+
+        const {postId }= req.params
+        console.log(postId);
+        // if(!id){
+        //     throw new Error('post id required')
+        // }
+        
+        const result= await PostService.getPostByIdService(postId as string)
+        res.status(200).json(result)
+        
+    } catch (error:any) {
+        res.status(400).json({
+            details:error.message,
+            message:' failed to get post by id'
+         })
+    }
+}
 export const postController={
     createPost,
-    getAllPosts
+    getAllPosts,
+    getPostById
 }
