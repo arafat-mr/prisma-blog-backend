@@ -87,7 +87,7 @@ const getPostById= async(req:Request,res:Response)=>{
         // if(!id){
         //     throw new Error('post id required')
         // }
-        
+         
         const result= await PostService.getPostByIdService(postId as string)
         res.status(200).json(result)
         

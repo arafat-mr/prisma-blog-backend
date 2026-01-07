@@ -1,5 +1,5 @@
 import { number } from "better-auth/*";
-import { Post, PostStatus } from "../../../generated/prisma/client";
+import { CommentStatus, Post, PostStatus } from "../../../generated/prisma/client";
 import { PostWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
 import { paginationSorting } from "../../utils/pagination_sorting";
@@ -85,6 +85,13 @@ const  getAllPostService= async(payload :
     where:{
     AND : andConditions
     },
+    include:{
+     _count:{
+      select:{
+         comments:true
+      }
+     }
+    },
     orderBy: {[payload.sortBy] : payload.sortOrder}
  })
 //  console.log(allPosts.length);
@@ -92,7 +99,8 @@ const  getAllPostService= async(payload :
 const count= await prisma.post.count({
    where:{
     AND : andConditions
-    }
+    },
+    
 })
  
  return {
@@ -127,6 +135,32 @@ const getPostByIdService=async(postId : string )=>{
    const postData = await prisma.post.findUnique({
       where :{
          id :postId
+      },
+      include:{
+         // comments:true // for all commemts
+         comments :{
+         where :{
+            parentId:null
+         },
+         orderBy:{createdAt : "desc"},
+         include:{
+            replies: {
+               where:{
+                  status: CommentStatus.APPROVED
+               },
+               orderBy:{createdAt:"asc"},
+
+               include: {
+                  replies : true
+               }
+            }
+         }
+         },
+         _count: {
+            select:{
+               comments: true
+            }
+         }
       }
    })
    return postData

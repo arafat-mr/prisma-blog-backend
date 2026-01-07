@@ -24,8 +24,8 @@ export const auth=(...roles:UserRole[])=>{
   return async(req:Request,res:Response,next:NextFunction)=>{
 
    try {
-     console.log('Middleware!!!');
-    console.log(req.headers);
+    //  console.log('Middleware!!!');
+    // console.log(req.headers);
     
     // console.log(roles);
     //get user session
