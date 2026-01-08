@@ -9,6 +9,10 @@ const router =express.Router()
 router.post('/',
     auth(UserRole.ADMIN,UserRole.USER),
     commnetsController.createComments)
-    router.get('/author/:authorId',commnetsController.getCommentsByAuthor)
+router.get('/author/:authorId',commnetsController.getCommentsByAuthor)
+ router.delete('/:id',auth(UserRole.ADMIN,UserRole.USER),commnetsController.deleteComment)       
+
+
+ router.patch('/:commentId', auth(UserRole.ADMIN,UserRole.USER),commnetsController.updateComment)
 router.get('/:commentId',commnetsController.getCommentsById)
 export const commentsRouter : Router=router
