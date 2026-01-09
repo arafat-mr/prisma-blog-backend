@@ -1,4 +1,4 @@
-import { dropbox } from "better-auth/types"
+
 import { prisma } from "../../lib/prisma"
 import { CommentStatus } from "../../../generated/prisma/enums"
 
@@ -130,10 +130,52 @@ console.log({commentData});
     data
  })
 }
+
+
+const commentControl = async(commentId: string,data: {status : CommentStatus})=>{
+
+    console.log('Moderate comment', {
+        commentId,data
+    });
+    
+    const commentData= await prisma.comment.findUniqueOrThrow({
+        where:{
+            id:commentId
+        }, 
+        select:{
+            id: true,
+            status:true
+        }
+    })
+// console.log(commentData);
+
+
+if(commentData.status=== data.status){
+
+    throw new Error('Your provided status is already exists')
+} 
+return await prisma.comment.update({
+    
+    where:{
+        id:commentId
+    },
+    data,
+    
+}
+
+)
+
+}
+
+
+
+ 
 export const commentsServices={
     createComments,
     getCommentsById,
     getCommentsByAuthor,
     deleteComment,
-    updateComment
+    updateComment,
+    commentControl,
+    
 }

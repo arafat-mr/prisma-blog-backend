@@ -1,4 +1,4 @@
-import { number } from "better-auth/*";
+import { date, number, prefault } from "better-auth/*";
 import { CommentStatus, Post, PostStatus } from "../../../generated/prisma/client";
 import { PostWhereInput } from "../../../generated/prisma/models";
 import { prisma } from "../../lib/prisma";
@@ -168,8 +168,73 @@ const getPostByIdService=async(postId : string )=>{
    return result
    
 }
+
+
+const getMyPosts=async(authorId : string)=>{
+
+   const userInfo = await prisma.user.findFirstOrThrow({
+      where :{
+         id : authorId,
+         status : 'ACTIVE'
+      },
+      select :{
+         id : true
+      }
+   })
+   // console.log('My Posts');
+   const result = await prisma.post.findMany({
+      where :{
+         authorId
+      },
+      orderBy :{
+         createdAt : "desc"
+      },
+      include :{
+         _count :{
+            select :{
+               comments : true
+            }
+         }
+      }
+   })
+
+   const myTotalPosts= await prisma.post.count ({
+      where :{
+         authorId
+      }
+   })
+   return { data :{
+      result,
+      myTotalPosts
+   }}
+}
+
+const updateMyPost =async(postId : string, data : Partial<Post>,authorId : string)=>{
+   console.log('Updated',{postId,data,authorId});
+const postData = await prisma.post.findUniqueOrThrow({
+  where :{
+   id : postId
+  },
+  select :{
+   authorId:true,
+   id : true
+  } 
+})
+
+if (postData.authorId !== authorId){
+   throw new Error('You are not allowed to update this')
+}
+ return prisma.post.update({
+   where :{
+      id : postId
+   },
+   data
+ })
+}
 export const PostService={
     createPost,
     getAllPostService,
-    getPostByIdService
+    getPostByIdService,
+  getMyPosts,
+  updateMyPost
 }

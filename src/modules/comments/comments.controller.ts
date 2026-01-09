@@ -21,7 +21,9 @@ const createComments= async(req:Request,res:Response)=>{
 const getCommentsById= async(req:Request,res:Response)=>{
     try {
         const {commentId}=req.params
-        
+          const user=req.user
+          console.log(user);
+          
         const result = await commentsServices.getCommentsById(commentId as string)
         res.status(200).json(result)
     } catch (error:any) {
@@ -84,17 +86,37 @@ const updateComment =async(req:Request,res:Response)=>{
         const result = await commentsServices.updateComment(authorId as string,commentId as string,data )
         res.status(200).json(result)
     } catch (error : any) {
+        // console.log(error);
+        
          res.status(400).json({
             error:error.message,
             message:' failed to Update comment'
         })
     }
 }
+
+
+const commentControl= async(req:Request,res:Response)=>{
+    try {
+     console.log('hhh');
+       const {commentId}= req.params
+        const result = await commentsServices.commentControl(commentId as string,req.body)
+        res.status(200).json(result)
+    } catch (error :any) {
+         res.status(400).json({
+            error:error.message,
+            message:' failed to moderate comment'
+        })
+    }
+}
+
+
 export const commnetsController={
     createComments,
     getCommentsById,
     getCommentsByAuthor,
     deleteComment,
-    updateComment
+    updateComment,
+    commentControl
 
 }

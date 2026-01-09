@@ -33,6 +33,7 @@ const createPost = async (req:Request,res:Response)=>{
 const getAllPosts= async(req:Request,res:Response)=>{
     try {
         const {search}= req.query
+        console.log(req.user)
         console.log('search value is',search);
         const searchString=typeof search ==='string'? search: undefined
 
@@ -84,6 +85,8 @@ const getPostById= async(req:Request,res:Response)=>{
 
         const {postId }= req.params
         console.log(postId);
+        console.log(req.user);
+        
         // if(!id){
         //     throw new Error('post id required')
         // }
@@ -98,8 +101,41 @@ const getPostById= async(req:Request,res:Response)=>{
          })
     }
 }
+
+const getMyPosts= async(req:Request,res:Response)=>{
+    try {
+        const user =req.user
+        console.log(user);
+        const result=await PostService.getMyPosts(user?.id as string)
+        res.status(200).json(result)
+    } catch (error : any) {
+          res.status(400).json({
+            details:error.message,
+            message:' failed to get post by id'
+         })
+    }
+}
+
+// user - update own posts but cant update is featured field
+// admi - everything
+const updateMyPost = async(req:Request,res:Response)=>{
+    try {
+        const {postId}= req.params
+        const authorId  = req.user?.id
+        const result = await PostService.updateMyPost(postId as string, req.body,authorId as string)
+
+        res.status(200).json(result)
+    } catch (error : any) {
+        res.status(400).json({
+            details:error.message,
+            message:' failed to update post'
+         })
+    }
+}
 export const postController={
     createPost,
     getAllPosts,
-    getPostById
+    getPostById,
+   getMyPosts,
+   updateMyPost
 }
