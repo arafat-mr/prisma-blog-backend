@@ -209,8 +209,10 @@ const getMyPosts=async(authorId : string)=>{
    }}
 }
 
-const updateMyPost =async(postId : string, data : Partial<Post>,authorId : string)=>{
+const updateMyPost =async(postId : string, data : Partial<Post>,authorId : string,isAdmin : boolean)=>{
    console.log('Updated',{postId,data,authorId});
+   // user - update own posts but cant update is featured field
+// admi - everything
 const postData = await prisma.post.findUniqueOrThrow({
   where :{
    id : postId
@@ -221,8 +223,23 @@ const postData = await prisma.post.findUniqueOrThrow({
   } 
 })
 
-if (postData.authorId !== authorId){
+if ( !isAdmin && (postData.authorId !== authorId)  ){
    throw new Error('You are not allowed to update this')
+}
+// if(!isAdmin && (postData.authorId === authorId)){
+//    return prisma.post.update ({
+//       where :{
+//          id : postId
+//       },
+//      select :{
+//       isFeatured : false
+//      },
+//      data
+//    })
+// }
+
+if (!isAdmin){
+   delete data.isFeatured
 }
  return prisma.post.update({
    where :{
@@ -231,10 +248,41 @@ if (postData.authorId !== authorId){
    data
  })
 }
+
+// delete user
+
+// user nijer post delete
+// admin all posts delete
+
+const deletePost= async(postId : string,authorId : string, isAdmin : boolean)=>{
+   console.log('Deleted');
+   const postData = await prisma.post.findFirstOrThrow ({
+      where :{
+         id :postId
+      },
+      select :{
+         id :true,
+         authorId : true
+      }
+   })
+
+   if (!isAdmin && (postData.authorId !== authorId)){
+      throw new Error("You are not owner or creator")
+   }
+
+   return await prisma.post.delete ({
+      where :{
+         id : postId
+      }
+   })
+   
+}
+
 export const PostService={
     createPost,
     getAllPostService,
     getPostByIdService,
   getMyPosts,
-  updateMyPost
+  updateMyPost,
+  deletePost
 }

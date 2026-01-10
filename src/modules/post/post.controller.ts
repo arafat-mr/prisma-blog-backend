@@ -3,6 +3,7 @@ import { PostService } from "./post.service"
 import { PostStatus } from "../../../generated/prisma/enums";
 import { paginationSorting } from "../../utils/pagination_sorting";
 import { prisma } from "../../lib/prisma";
+import { UserRole } from "../../middleware/auth";
 
 
 
@@ -22,9 +23,12 @@ const createPost = async (req:Request,res:Response)=>{
 
  res.status(201).json(result)
     } catch (error:any) {
+        console.log(error);
+        
          res.status(400).json({
             details:error.message,
             message:'Creation failed'
+            
          })
     }
  
@@ -122,7 +126,10 @@ const updateMyPost = async(req:Request,res:Response)=>{
     try {
         const {postId}= req.params
         const authorId  = req.user?.id
-        const result = await PostService.updateMyPost(postId as string, req.body,authorId as string)
+        const isAdmin = req.user?.role === UserRole.ADMIN
+        console.log(isAdmin);
+        
+        const result = await PostService.updateMyPost(postId as string, req.body,authorId as string,isAdmin as boolean)
 
         res.status(200).json(result)
     } catch (error : any) {
@@ -132,10 +139,31 @@ const updateMyPost = async(req:Request,res:Response)=>{
          })
     }
 }
+
+const deletePost =async(req:Request,res:Response)=>{
+try {
+    const {postId}= req.params
+const authorId= req.user?.id
+const isAdmin= req.user?.role === UserRole.ADMIN
+
+const result = await PostService.deletePost(postId as string,authorId as string,isAdmin as boolean)
+res.status(200).json({
+    message :'Deleted successfully'
+})
+} catch (error : any) {
+res.status(400).json({
+            details:error.message,
+            message:' failed to delete post'
+         })
+}
+
+
+}
 export const postController={
     createPost,
     getAllPosts,
     getPostById,
    getMyPosts,
-   updateMyPost
+   updateMyPost,
+   deletePost
 }
