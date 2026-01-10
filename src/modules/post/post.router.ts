@@ -13,6 +13,7 @@ router.get('/myPosts',auth(UserRole.ADMIN,UserRole.USER),postController.getMyPos
 
 router.get('/',postController.getAllPosts)
 
+router.get('/states',postController.getStates)
 router.patch ('/:postId',auth(UserRole.ADMIN,UserRole.USER),postController.updateMyPost)
 
 router.delete('/:postId',auth(UserRole.ADMIN,UserRole.USER),postController.deletePost)

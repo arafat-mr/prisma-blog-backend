@@ -159,11 +159,26 @@ res.status(400).json({
 
 
 }
+
+const getStates= async (req:Request,res:Response)=>{
+   try {
+  
+
+const result = await PostService.getstats()
+res.status(200).json(result)
+} catch (error : any) {
+res.status(400).json({
+            details:error.message,
+            message:' failed to get states'
+         })
+}
+}
 export const postController={
     createPost,
     getAllPosts,
     getPostById,
    getMyPosts,
    updateMyPost,
-   deletePost
+   deletePost,
+   getStates
 }
