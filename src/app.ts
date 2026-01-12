@@ -4,6 +4,8 @@ import { toNodeHandler } from "better-auth/node";
 import { auth } from "./lib/auth";
 import cors from "cors";
 import { commentsRouter } from "./modules/comments/comments.router";
+import errorHandler from "./middleware/globalErrorHandler";
+import notFound from "./middleware/notFound";
 const app: Application = express();
 app.use(
   cors({
@@ -19,4 +21,6 @@ app.get("/", (req, res) => {
   res.send("Hello from prisma-blog backend");
 });
 
+app.use(notFound)
+app.use(errorHandler)
 export default app;

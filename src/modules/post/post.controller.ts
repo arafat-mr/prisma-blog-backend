@@ -1,13 +1,14 @@
-import { Request, Response } from "express"
+import { NextFunction, Request, Response } from "express"
 import { PostService } from "./post.service"
 import { PostStatus } from "../../../generated/prisma/enums";
 import { paginationSorting } from "../../utils/pagination_sorting";
 import { prisma } from "../../lib/prisma";
 import { UserRole } from "../../middleware/auth";
+import errorHandler from "../../middleware/globalErrorHandler";
 
 
 
-const createPost = async (req:Request,res:Response)=>{
+const createPost = async (req:Request,res:Response,next :NextFunction)=>{
 
     try {
         console.log(req.user);
@@ -15,7 +16,7 @@ const createPost = async (req:Request,res:Response)=>{
         if(!user){
            return  res.status(400).json({
            
-            message:'Creation failed'
+            message:'Creation failed 1'
          })
         }
         
@@ -25,11 +26,13 @@ const createPost = async (req:Request,res:Response)=>{
     } catch (error:any) {
         console.log(error);
         
-         res.status(400).json({
-            details:error.message,
-            message:'Creation failed'
+        // //  res.status(400).json({
+        // //     details:error.message,
+        // //     message:'Creation failed 1'
             
-         })
+        //  })
+        next(error)
+
     }
  
 }
@@ -122,7 +125,7 @@ const getMyPosts= async(req:Request,res:Response)=>{
 
 // user - update own posts but cant update is featured field
 // admi - everything
-const updateMyPost = async(req:Request,res:Response)=>{
+const updateMyPost = async(req:Request,res:Response,next:NextFunction)=>{
     try {
         const {postId}= req.params
         const authorId  = req.user?.id
@@ -133,10 +136,12 @@ const updateMyPost = async(req:Request,res:Response)=>{
 
         res.status(200).json(result)
     } catch (error : any) {
-        res.status(400).json({
-            details:error.message,
-            message:' failed to update post'
-         })
+        // res.status(400).json({
+        //     details:error,
+        //     message:' failed to update post'
+        //  })
+        next(error)
+       
     }
 }
 
@@ -160,17 +165,18 @@ res.status(400).json({
 
 }
 
-const getStates= async (req:Request,res:Response)=>{
+const getStates= async (req:Request,res:Response,next:NextFunction)=>{
    try {
   
 
 const result = await PostService.getstats()
 res.status(200).json(result)
 } catch (error : any) {
-res.status(400).json({
-            details:error.message,
-            message:' failed to get states'
-         })
+// res.status(400).json({
+//             details:error.message,
+//             message:' failed to get states'
+//          })
+next(error)
 }
 }
 export const postController={
